@@ -27,7 +27,7 @@ app:
     api-key: ${GOOGLE_BOOKS_API_KEY}
     base-url: https://www.googleapis.com/books/v1
   cors:
-    allowed-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+    allowed-origin: ${FRONTEND_ORIGIN:https://smart-shelf-iota.vercel.app/}
 
 management:
   endpoints:
