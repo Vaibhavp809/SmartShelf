@@ -110,3 +110,7 @@ The UI will start on `http://localhost:5173`.
 - A normalized SQL schema is also included in [docs/sql/schema.sql](C:/Projects/SmartShelf/docs/sql/schema.sql) if you want manual setup.
 - The recommendation engine uses JDBC for genre suggestions, "also liked", and analytics queries.
 - If you want, the next step can be adding tests, Docker support, seed data, and a Maven Wrapper so the backend runs with one command.
+
+## Copyright
+
+Copyright (c) 2026 Vaibhav Parab. All rights reserved.
