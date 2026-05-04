@@ -448,6 +448,29 @@ select {
   margin-top: 1.5rem;
 }
 
+.dashboard-book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.dashboard-book-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.dashboard-card-actions .ghost-button {
+  flex: 1;
+  text-align: center;
+}
+
 .recommendation-hero {
   display: grid;
   grid-template-columns: 1.35fr 0.95fr;

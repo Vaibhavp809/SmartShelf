@@ -1,6 +1,6 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchGenreRecommendations, fetchLibrary, removeLibraryEntry, searchBooks } from "../api/client";
-import HorizontalShelf from "../components/HorizontalShelf";
+import { fetchLibrary, removeLibraryEntry } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
 const shelves = ["ALL", "READ", "WISHLIST", "FAVORITE"];
@@ -9,9 +9,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const [activeShelf, setActiveShelf] = useState("ALL");
   const [entries, setEntries] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [recommendationLabel, setRecommendationLabel] = useState("Genre-driven recommendations");
 
   useEffect(() => {
     setLoading(true);
@@ -25,56 +23,6 @@ export default function DashboardPage() {
       })
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    const visibleEntries = activeShelf === "ALL"
-      ? entries
-      : entries.filter((entry) => entry.status === activeShelf);
-    const currentCategory = visibleEntries[0]?.book?.category;
-    if (!currentCategory) {
-      setRecommendations([]);
-      return;
-    }
-    fetchGenreRecommendations(currentCategory)
-      .then(async (data) => {
-        if (data.length > 0) {
-          setRecommendationLabel(`Because you like ${currentCategory}`);
-          setRecommendations(data);
-          return;
-        }
-
-        const fallback = await searchBooks(`${currentCategory} books`, 0, 8).catch(() => []);
-        setRecommendationLabel(`Fresh picks in ${currentCategory}`);
-        setRecommendations(
-          fallback.map((book) => ({
-            bookId: book.id || book.googleBookId,
-            title: book.title,
-            reason: `Trending around ${book.category || currentCategory}`,
-            score: "New",
-            googleBookId: book.googleBookId,
-            category: book.category || currentCategory,
-            thumbnailUrl: book.thumbnailUrl,
-            authors: book.authors
-          }))
-        );
-      })
-      .catch(async () => {
-        const fallback = await searchBooks(`${currentCategory} books`, 0, 8).catch(() => []);
-        setRecommendationLabel(`Fresh picks in ${currentCategory}`);
-        setRecommendations(
-          fallback.map((book) => ({
-            bookId: book.id || book.googleBookId,
-            title: book.title,
-            reason: `Trending around ${book.category || currentCategory}`,
-            score: "New",
-            googleBookId: book.googleBookId,
-            category: book.category || currentCategory,
-            thumbnailUrl: book.thumbnailUrl,
-            authors: book.authors
-          }))
-        );
-      });
-  }, [entries, activeShelf]);
 
   const visibleEntries = activeShelf === "ALL"
     ? entries
@@ -97,58 +45,50 @@ export default function DashboardPage() {
       <section className="glass-panel dashboard-banner">
         <span className="eyebrow">Your Reader Hub</span>
         <h1>{user?.fullName}'s dashboard</h1>
-        <p>Keep shelves organized, revisit activity, and surface fresh reads based on your current taste.</p>
+        <p>Organize your shelves, revisit saved books, and open any cover to jump back into the full book page.</p>
       </section>
 
-      <section className="dashboard-layout">
-        <div className="glass-panel section-panel">
-          <div className="tab-row">
-            {shelves.map((shelf) => (
-              <button
-                key={shelf}
-                className={shelf === activeShelf ? "tab active" : "tab"}
-                onClick={() => setActiveShelf(shelf)}
-              >
-                {shelf} ({shelfCounts[shelf]})
-              </button>
-            ))}
-          </div>
+      <section className="glass-panel section-panel">
+        <div className="tab-row">
+          {shelves.map((shelf) => (
+            <button
+              key={shelf}
+              className={shelf === activeShelf ? "tab active" : "tab"}
+              onClick={() => setActiveShelf(shelf)}
+            >
+              {shelf} ({shelfCounts[shelf]})
+            </button>
+          ))}
+        </div>
 
-          <div className="dashboard-list">
+        {visibleEntries.length > 0 ? (
+          <div className="dashboard-book-grid">
             {visibleEntries.map((entry) => (
-              <article key={entry.entryId} className="dashboard-item">
-                <div>
+              <article key={entry.entryId} className="book-card dashboard-book-card">
+                <Link to={`/books/${entry.book.googleBookId}`}>
+                  <div className="book-cover-wrap">
+                    <img
+                      src={entry.book.thumbnailUrl || "https://placehold.co/320x480/160c2f/e3f4ff?text=SmartShelf"}
+                      alt={entry.book.title}
+                      className="book-cover"
+                    />
+                  </div>
+                </Link>
+                <div className="book-card-content">
                   <span className="eyebrow">{entry.status}</span>
                   <h3>{entry.book.title}</h3>
                   <p>{entry.book.authors}</p>
+                  <div className="dashboard-card-actions">
+                    <Link className="ghost-button" to={`/books/${entry.book.googleBookId}`}>Open</Link>
+                    <button className="ghost-button" onClick={() => handleDelete(entry.entryId)}>Remove</button>
+                  </div>
                 </div>
-                <button className="ghost-button" onClick={() => handleDelete(entry.entryId)}>Remove</button>
               </article>
             ))}
-            {!loading && visibleEntries.length === 0 && <p className="empty-state">This shelf is waiting for its first book.</p>}
           </div>
-        </div>
-
-        <div className="glass-panel section-panel">
-          <span className="eyebrow">For You</span>
-          <h2>{recommendationLabel}</h2>
-          {recommendations.length > 0 ? (
-            <HorizontalShelf
-              title={recommendationLabel}
-              description="Open any cover to jump straight into the full book details page."
-              books={recommendations.map((item) => ({
-                googleBookId: item.googleBookId,
-                title: item.title,
-                category: item.category,
-                authors: item.reason || item.authors,
-                thumbnailUrl: item.thumbnailUrl
-              }))}
-              actionRenderer={(book) => <span className="pill">{book.authors?.startsWith("Trending") ? "Genre Match" : "For You"}</span>}
-            />
-          ) : (
-            <p className="empty-state">Add books to a shelf first, then SmartShelf will start tailoring picks.</p>
-          )}
-        </div>
+        ) : (
+          !loading && <p className="empty-state">This shelf is waiting for its first book.</p>
+        )}
       </section>
     </main>
   );
