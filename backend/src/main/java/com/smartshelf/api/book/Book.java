@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
@@ -30,7 +31,8 @@ public class Book {
     @Column(length = 120)
     private String category;
 
-    @Column(length = 1500)
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(length = 500)
@@ -118,4 +120,3 @@ public class Book {
         this.publishedDate = publishedDate;
     }
 }
-
