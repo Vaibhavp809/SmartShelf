@@ -5,6 +5,7 @@ import SearchPage from "./pages/SearchPage";
 import BookDetailsPage from "./pages/BookDetailsPage";
 import DashboardPage from "./pages/DashboardPage";
 import AuthPage from "./pages/AuthPage";
+import ForYouPage from "./pages/ForYouPage";
 import { useAuth } from "./context/AuthContext";
 
 function ProtectedRoute({ children }) {
@@ -34,6 +35,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/for-you"
+          element={
+            <ProtectedRoute>
+              <ForYouPage />
             </ProtectedRoute>
           }
         />

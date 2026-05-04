@@ -22,6 +22,7 @@ export default function Navbar() {
       <nav className="nav-links">
         <NavLink to="/">Home</NavLink>
         <NavLink to="/search">Search</NavLink>
+        {token && <NavLink to="/for-you">For You</NavLink>}
         {token && <NavLink to="/dashboard">Dashboard</NavLink>}
       </nav>
 
