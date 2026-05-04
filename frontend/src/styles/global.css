@@ -508,6 +508,24 @@ select {
   margin: 0;
 }
 
+.validation-box {
+  border-radius: 18px;
+  padding: 0.95rem 1rem;
+  background: rgba(255, 102, 143, 0.08);
+  border: 1px solid rgba(255, 102, 143, 0.24);
+}
+
+.validation-box strong {
+  display: block;
+  margin-bottom: 0.55rem;
+}
+
+.validation-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #ffd8e5;
+}
+
 .success-text {
   color: var(--accent);
   margin: 0.8rem 0 0;

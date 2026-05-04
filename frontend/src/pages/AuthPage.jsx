@@ -2,6 +2,28 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+function friendlyValidationMessages(errors) {
+  if (!errors) {
+    return [];
+  }
+
+  const messages = [];
+
+  if (errors.fullName) {
+    messages.push("Enter your name. It should be at least 3 characters long.");
+  }
+
+  if (errors.email) {
+    messages.push("Enter a proper email address, like name@example.com.");
+  }
+
+  if (errors.password) {
+    messages.push("Password should be at least 6 characters long.");
+  }
+
+  return messages;
+}
+
 export default function AuthPage() {
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -9,10 +31,12 @@ export default function AuthPage() {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ fullName: "", email: "", password: "" });
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState([]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+    setValidationErrors([]);
     try {
       if (mode === "login") {
         await login({ email: form.email, password: form.password });
@@ -21,6 +45,15 @@ export default function AuthPage() {
       }
       navigate(location.state?.from || "/dashboard");
     } catch (requestError) {
+      const apiErrors = requestError.response?.data?.errors;
+      const structuredMessages = friendlyValidationMessages(apiErrors);
+
+      if (structuredMessages.length > 0) {
+        setValidationErrors(structuredMessages);
+        setError("");
+        return;
+      }
+
       setError(requestError.response?.data?.message || "Something went wrong.");
     }
   };
@@ -60,6 +93,14 @@ export default function AuthPage() {
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
           />
+          {validationErrors.length > 0 && (
+            <div className="validation-box">
+              <strong>Please fix the following:</strong>
+              <ul className="validation-list">
+                {validationErrors.map((message) => <li key={message}>{message}</li>)}
+              </ul>
+            </div>
+          )}
           {error && <p className="error-text">{error}</p>}
           <button className="primary-button" type="submit">{mode === "login" ? "Sign In" : "Create Account"}</button>
         </form>
