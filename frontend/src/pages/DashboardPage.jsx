@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchGenreRecommendations, fetchLibrary, removeLibraryEntry, searchBooks } from "../api/client";
+import HorizontalShelf from "../components/HorizontalShelf";
 import { useAuth } from "../context/AuthContext";
 
 const shelves = ["ALL", "READ", "WISHLIST", "FAVORITE"];
@@ -50,7 +51,10 @@ export default function DashboardPage() {
             title: book.title,
             reason: `Trending around ${book.category || currentCategory}`,
             score: "New",
-            googleBookId: book.googleBookId
+            googleBookId: book.googleBookId,
+            category: book.category || currentCategory,
+            thumbnailUrl: book.thumbnailUrl,
+            authors: book.authors
           }))
         );
       })
@@ -63,7 +67,10 @@ export default function DashboardPage() {
             title: book.title,
             reason: `Trending around ${book.category || currentCategory}`,
             score: "New",
-            googleBookId: book.googleBookId
+            googleBookId: book.googleBookId,
+            category: book.category || currentCategory,
+            thumbnailUrl: book.thumbnailUrl,
+            authors: book.authors
           }))
         );
       });
@@ -125,20 +132,22 @@ export default function DashboardPage() {
         <div className="glass-panel section-panel">
           <span className="eyebrow">For You</span>
           <h2>{recommendationLabel}</h2>
-          <div className="dashboard-list">
-            {recommendations.map((item) => (
-              <article key={item.bookId} className="dashboard-item">
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.reason}</p>
-                </div>
-                <span className="pill">{item.score}</span>
-              </article>
-            ))}
-            {recommendations.length === 0 && (
-              <p className="empty-state">Add books to a shelf first, then SmartShelf will start tailoring picks.</p>
-            )}
-          </div>
+          {recommendations.length > 0 ? (
+            <HorizontalShelf
+              title={recommendationLabel}
+              description="Open any cover to jump straight into the full book details page."
+              books={recommendations.map((item) => ({
+                googleBookId: item.googleBookId,
+                title: item.title,
+                category: item.category,
+                authors: item.reason || item.authors,
+                thumbnailUrl: item.thumbnailUrl
+              }))}
+              actionRenderer={(book) => <span className="pill">{book.authors?.startsWith("Trending") ? "Genre Match" : "For You"}</span>}
+            />
+          ) : (
+            <p className="empty-state">Add books to a shelf first, then SmartShelf will start tailoring picks.</p>
+          )}
         </div>
       </section>
     </main>
